@@ -4,4 +4,6 @@
 
 ##使用方法：
 
-直接实例化并执行Crawler类的crawl()方法即可。
+所有的配置都在configure.py文件中
+
+配置好之后直接实例化并执行Crawler类的crawl()方法即可。

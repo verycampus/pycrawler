@@ -1,5 +1,7 @@
 #!/usr/bin/env python
+#!coding=utf-8
 
+# system deps
 from BeautifulSoup import *
 import re
 import lxml
@@ -8,47 +10,51 @@ import sys
 import urllib2
 from urlparse import urljoin
 
-config = {
-    'seeds':['http://movie.douban.com'],
-    'depth':3,
-    'patterns':[r'http://movie.douban.com/subject/\d+/$',r'http://movie.douban.com$'],
-    'contents':[
-                {'name':'name','xpath':'//span[@property="v:itemreviewed"]'},
-                {'name':'year','xpath':'//span[@class="year"]'}
-               ]
-    }
+# user deps
+import configure
+
+# 已经抓取到的链接，用来保证单个链接只需要抓取一次
+existLinks = set()
+# 抓取链接队列，包含链接的基本信息：{url,parsed,depth}
+links = []
 
 class Crawler:
   # init class
   def __init__(self):
-    self.seeds = config['seeds']
-    self.depth = config['depth']
+    global links
+    self.seeds = configure.config['seeds']
+    self.depth = configure.config['depth']
+    self.patterns = configure.config['patterns']
+    self.contents = configure.config['contents']
+    links = self.seeds
 
   # execute crawler
   def crawl(self):
+    global links
     print 'start crawling'
-    links = self.seeds
 
     for i in range(self.depth):
-      newUrls = set()
+      newUrls = []
       for link in links:
-        print 'link = %s ' % link
+        print 'link = %s ' % link['url']
         try:
-          c = self.openUrl(link)
+          c = self.openUrl(link['url'])
         except:
-          print 'Could not open %s' % link
+          print 'Could not open %s' % link['url']
           print 'Error Info : %s ' % sys.exc_info()[1]
           continue
         html = c.read()
         self.extractContent(html)
-        extractLinks = self.extractLinks(link,html)
-        newUrls = newUrls.union(extractLinks)
+        extractLinks = self.extractLinks(link['url'],html,i)
+        newUrls.extend(extractLinks)
       links = newUrls
 
   # regrex patterns use "or".
   def filterUrl(self,url):
+    if url in existLinks:
+      return False
     match = False
-    for p in config['patterns']:
+    for p in self.patterns:
       p = re.compile(p)
       if p.findall(url):
         match = True
@@ -70,8 +76,8 @@ class Crawler:
     return c
 
   #extract links from a web page
-  def extractLinks(self,referer,html):
-    links = set()
+  def extractLinks(self,referer,html,depth):
+    links = []
     soup = BeautifulSoup(html)
     tags = soup('a')
     for l in tags:
@@ -79,15 +85,15 @@ class Crawler:
         url = urljoin(referer,l['href'])
         url = url.split('#')[0]
         if(self.filterUrl(url)):
-          links.add(url)
+          links.append({'url':'%s' % url,'parsed':False,'depth':depth+1})
+          existLinks.add(url)
     return links
 
   # extract content from html using xpath
   def extractContent(self,html):
-    contents = config['contents']
     parser = etree.XMLParser(ns_clean=True, recover=True)
     tree = etree.fromstring(html,parser)
-    for c in contents:
+    for c in self.contents:
       m = tree.xpath(c['xpath'])
       if len(m) == 1:
         print c['name'] + ' : ' + m[0].text

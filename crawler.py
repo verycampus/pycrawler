@@ -10,7 +10,7 @@ class Crawler:
   def crawl(self):
     print 'start crawling'
     #实例化多线程抓取模块，指定3个线程
-    f = fetcher.Fetcher(3)
+    f = fetcher.Fetcher()
     f.start()
 
     while True:

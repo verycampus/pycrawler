@@ -22,8 +22,7 @@ import configure
 
 class Fetcher:
   # 初始化数据
-  def __init__(self,thread_number = 3):
-    self.thread_number = thread_number
+  def __init__(self):
     self.lock = Lock()
     self.links = Queue()
     self.exist = set()
@@ -36,6 +35,7 @@ class Fetcher:
     self.depth = configure.config['depth']
     self.seeds = configure.config['seeds']
     self.encoding = configure.config['encoding']
+    self.thread_number = configure.config['thread_number']
 
   #解构的时候不必等待队列完成
   def __del__(self):

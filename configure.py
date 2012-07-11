@@ -18,7 +18,8 @@ config_163 = {
                 {'name':u'标题','xpath':'//*[@id="h1title"]'},
                ],
     #网页编码,自动探测太耗费性能，手动指定比较合适
-    'encoding':'gb2312'
+    'encoding':'gb2312',
+    'thread_number':3
     }
 
 #京东礼物
@@ -36,5 +37,6 @@ config = {
     'contents':[
                 {'name':u'标题','xpath':'//*[@id="i-detail"]/*[1]'},
                ],
-    'encoding':'gbk'
+    'encoding':'gbk',
+    'thread_number':10
     }

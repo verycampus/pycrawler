@@ -34,7 +34,7 @@ config = {
     'stop_patterns':[r'http://search.360buy.com/Search?keyword=%C0%F1%CE%EF&area=1&qr=%40%23%24%25&page=\d+$'],
     #哪些字段需要被抓取下来
     'contents':[
-                {'name':u'标题','xpath':'//*[@id="i-detail"]/li[1]'},
+                {'name':u'标题','xpath':'//*[@id="i-detail"]/*[1]'},
                ],
     'encoding':'gbk'
     }

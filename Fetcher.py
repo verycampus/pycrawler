@@ -73,15 +73,18 @@ class Fetcher:
     while True:
       link = self.links.get()
 
-      thread_name = current_thread().name
-      print 'thread = %s,link = %s' % (thread_name,link['url'])
-      response = self.openUrl(link['url'])
-      html = response.read()
-      #给网页重新编码，默认lxml只能处理utf-8
-      if self.encoding != 'utf-8':
-        html = html.decode(self.encoding,'ignore').encode('utf-8')
-      self.extractContent(html)
-      self.extractLinks(link['url'],html,link['depth'])
+      try:
+        response = self.openUrl(link['url'])
+        html = response.read()
+        #给网页重新编码，默认lxml只能处理utf-8
+        if self.encoding != 'utf-8':
+          html = html.decode(self.encoding,'ignore').encode('utf-8')
+        self.extractContent(html,link['url'])
+        self.extractLinks(link['url'],html,link['depth'])
+      except:
+        print 'Could not open %s' % link['url']
+        print 'Error Info : %s ' % sys.exc_info()[1]
+        continue
 
       self.links.task_done()
 
@@ -147,7 +150,9 @@ class Fetcher:
           self.exist.add(url)
 
   #从某个网页解析出需要的内容 
-  def extractContent(self,html):
+  def extractContent(self,html,url):
+    thread_name = current_thread().name
+    print 'url[%s] : %s' % (thread_name,url)
     parser = etree.XMLParser(ns_clean=True, recover=True)
     tree = etree.fromstring(html,parser)
     if tree!=None:

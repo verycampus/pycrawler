@@ -13,6 +13,7 @@ config_163 = {
     'page_patterns':[],
     #除了达到指定的depth，url匹配到这里也会停止抓取
     'stop_patterns':[],
+    #哪些字段需要被抓取下来
     'contents':[
                 {'name':u'标题','xpath':'//*[@id="h1title"]'},
                ],
@@ -31,6 +32,7 @@ config = {
     'page_patterns':[r'http://search.360buy.com/Search?keyword=%C0%F1%CE%EF&area=1&qr=%40%23%24%25&page=\d+$'],
     #除了达到指定的depth，url匹配到这里也会停止抓取
     'stop_patterns':[r'http://search.360buy.com/Search?keyword=%C0%F1%CE%EF&area=1&qr=%40%23%24%25&page=\d+$'],
+    #哪些字段需要被抓取下来
     'contents':[
                 {'name':u'标题','xpath':'//*[@id="i-detail"]/li[1]'},
                ],

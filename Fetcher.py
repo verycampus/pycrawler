@@ -26,6 +26,7 @@ class Fetcher:
     self.lock = Lock()
     self.links = Queue()
     self.exist = set()
+    self.complate = 0
     self.running = 0
 
     self.item_patterns = configure.config['item_patterns']
@@ -81,11 +82,13 @@ class Fetcher:
           html = html.decode(self.encoding,'ignore').encode('utf-8')
         self.extractContent(html,link['url'])
         self.extractLinks(link['url'],html,link['depth'])
+        with self.lock:
+          self.complate += 1
       except:
         print 'Could not open %s' % link['url']
         print 'Error Info : %s ' % sys.exc_info()[1]
         continue
-
+      
       self.links.task_done()
 
   #判断链接是否已经被爬取过
@@ -107,6 +110,15 @@ class Fetcher:
   def isPage(self,url):
     match = False
     for p in self.page_patterns:
+      p = re.compile(p)
+      if p.findall(url):
+        match = True
+    return match
+
+  #判断链接是不是停止链接
+  def isStop(self,url):
+    match = False
+    for p in self.stop_patterns:
       p = re.compile(p)
       if p.findall(url):
         match = True
@@ -152,7 +164,8 @@ class Fetcher:
   #从某个网页解析出需要的内容 
   def extractContent(self,html,url):
     thread_name = current_thread().name
-    print 'url[%s] : %s' % (thread_name,url)
+    t = time.strftime('%y-%m-%d %H:%M:%S',time.localtime())
+    print '[%s][%s][total = %s] : %s' % (t,thread_name,self.complate,url)
     parser = etree.XMLParser(ns_clean=True, recover=True)
     tree = etree.fromstring(html,parser)
     if tree!=None:

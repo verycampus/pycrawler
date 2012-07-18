@@ -194,3 +194,10 @@ class Fetcher:
         m = tree.xpath(c['xpath'])
         if len(m) >= 1:
           print c['name'] + ' : ' + m[0].text
+  
+  def printFinishLog(self):
+    print 'finish items: %s' % self.complate
+    print 'fail items : %s , list below :' % self.fail.qsize()
+    while(not self.fail.empty()):
+      print self.fail.get()['url']
+    print ''

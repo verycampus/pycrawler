@@ -13,6 +13,9 @@ class Crawler:
     f = fetcher.Fetcher()
     f.start()
 
-    while True:
+    while f.get_running_count() > 0:
       print '------------ running threads : %s ------------' % f.get_running_count()
       time.sleep(5)
+
+    f.printFinishLog()
+      

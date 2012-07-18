@@ -38,5 +38,6 @@ config = {
                 {'name':u'标题','xpath':'//*[@id="i-detail"]/*[1]'},
                ],
     'encoding':'gbk',
-    'thread_number':10
+    'thread_number':10,
+    'max_number':200
     }

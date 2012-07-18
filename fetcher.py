@@ -25,6 +25,8 @@ class Fetcher:
   def __init__(self):
     self.lock = Lock()
     self.links = Queue()
+    self.retry = Queue()
+    self.fail = Queue()
     self.exist = set()
     self.complate = 0
     self.running = 0
@@ -37,6 +39,7 @@ class Fetcher:
     self.seeds = configure.config['seeds']
     self.encoding = configure.config['encoding']
     self.thread_number = configure.config['thread_number']
+    self.max_number = configure.config['max_number']
 
   #解构的时候不必等待队列完成
   def __del__(self):
@@ -61,7 +64,6 @@ class Fetcher:
   def push(self,link):
     if link['url'] not in self.exist:
       self.links.put(link)
-      self.exist.add(link['url'])
 
   #获得当前运行的线程数
   def get_running_count(self):
@@ -72,7 +74,13 @@ class Fetcher:
     with self.lock:
       self.running += 1
     while True:
-      link = self.links.get()
+      if self.complate >= self.max_number:
+        break
+      link = {}
+      if self.retry.empty():
+        link = self.links.get()
+      else:
+        link = self.retry.get()
 
       try:
         response = self.openUrl(link['url'])
@@ -84,12 +92,23 @@ class Fetcher:
         self.extractLinks(link['url'],html,link['depth'])
         with self.lock:
           self.complate += 1
+          self.exist.add(link['url'])
       except:
+        if link.has_key('retry'):
+          if link['retry'] >=3:
+            self.fail.put(link)
+          else:
+            link['retry'] += 1
+            self.retry.put(link)
+        else:
+          link['retry'] = 1
+          self.retry.put(link)
         print 'Could not open %s' % link['url']
         print 'Error Info : %s ' % sys.exc_info()[1]
         continue
-      
+
       self.links.task_done()
+    self.running -= 1
 
   #判断链接是否已经被爬取过
   def isExist(self,url):
@@ -165,7 +184,9 @@ class Fetcher:
   def extractContent(self,html,url):
     thread_name = current_thread().name
     t = time.strftime('%y-%m-%d %H:%M:%S',time.localtime())
-    print '[%s][%s][total = %s] : %s' % (t,thread_name,self.complate,url)
+    print '[%s][%s][finish = %s][retry = %s][fail = %s] : %s' % (
+        t,thread_name,self.complate,self.retry.qsize(),self.fail.qsize(),url
+        )
     parser = etree.XMLParser(ns_clean=True, recover=True)
     tree = etree.fromstring(html,parser)
     if tree!=None:

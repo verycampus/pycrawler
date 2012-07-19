@@ -4,6 +4,16 @@
 import time
 import fetcher
 
+try:
+  import BeautifulSoup
+except:
+  print '请先下载安装Python BeautifulSoup模块,可以使用easy_install BeautifulSoup命令'
+
+try:
+  import lxml
+except:
+  print '请先下载安装Python lxml模块，可以使用easy_install lxml命令'
+
 class Crawler:
 
   #启动爬虫 

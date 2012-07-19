@@ -15,6 +15,8 @@ import re
 import sys
 
 # 自定义模块
+from content import Content
+from logger import Logger 
 import configure
 
 # crawler会不断的把待爬取链接push到Fetcher实例
@@ -30,7 +32,9 @@ class Fetcher:
     self.exist = set()
     self.complate = 0
     self.running = 0
+    self.content = Content()
 
+    # 配置信息
     self.item_patterns = configure.config['item_patterns']
     self.page_patterns = configure.config['page_patterns']
     self.stop_patterns = configure.config['stop_patterns']
@@ -184,17 +188,13 @@ class Fetcher:
   def extractContent(self,html,url):
     thread_name = current_thread().name
     t = time.strftime('%y-%m-%d %H:%M:%S',time.localtime())
-    print '[%s][%s][finish = %s][retry = %s][fail = %s] : %s' % (
-        t,thread_name,self.complate,self.retry.qsize(),self.fail.qsize(),url
-        )
+    Logger.write('[%s][%s][finish = %s][fail = %s] : %s' % (
+        t,thread_name,self.complate,self.fail.qsize(),url
+        ))
     parser = etree.XMLParser(ns_clean=True, recover=True)
     tree = etree.fromstring(html,parser)
-    if tree!=None:
-      for c in self.contents:
-        m = tree.xpath(c['xpath'])
-        if len(m) >= 1:
-          print c['name'] + ' : ' + m[0].text
-  
+    self.content.write(url,tree,self.contents)
+
   def printFinishLog(self):
     print 'finish items: %s' % self.complate
     print 'fail items : %s , list below :' % self.fail.qsize()

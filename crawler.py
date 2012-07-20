@@ -17,10 +17,10 @@ except:
 class Crawler:
 
   #启动爬虫 
-  def crawl(self):
+  def crawl(self,config):
     print 'start crawling'
     #实例化多线程抓取模块，指定3个线程
-    f = fetcher.Fetcher()
+    f = fetcher.Fetcher(config)
     f.start()
 
     while f.get_running_count() > 0:

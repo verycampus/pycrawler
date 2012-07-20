@@ -17,14 +17,14 @@ import sys
 # 自定义模块
 from content import Content
 from logger import Logger 
-import configure
+from configure import config
 
 # crawler会不断的把待爬取链接push到Fetcher实例
 # Fetcher实例创建多个线程对待爬取链接进行解析
 
 class Fetcher:
   # 初始化数据
-  def __init__(self):
+  def __init__(self,cfg_name):
     self.lock = Lock()
     self.links = Queue()
     self.retry = Queue()
@@ -35,15 +35,15 @@ class Fetcher:
     self.content = Content()
 
     # 配置信息
-    self.item_patterns = configure.config['item_patterns']
-    self.page_patterns = configure.config['page_patterns']
-    self.stop_patterns = configure.config['stop_patterns']
-    self.contents = configure.config['contents']
-    self.depth = configure.config['depth']
-    self.seeds = configure.config['seeds']
-    self.encoding = configure.config['encoding']
-    self.thread_number = configure.config['thread_number']
-    self.max_number = configure.config['max_number']
+    self.item_patterns = config[cfg_name]['item_patterns']
+    self.page_patterns = config[cfg_name]['page_patterns']
+    self.stop_patterns = config[cfg_name]['stop_patterns']
+    self.contents = config[cfg_name]['contents']
+    self.depth = config[cfg_name]['depth']
+    self.seeds = config[cfg_name]['seeds']
+    self.encoding = config[cfg_name]['encoding']
+    self.thread_number = config[cfg_name]['thread_number']
+    self.max_number = config[cfg_name]['max_number']
 
   #解构的时候不必等待队列完成
   def __del__(self):
